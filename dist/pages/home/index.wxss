@@ -1,0 +1,151 @@
+/*!************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].oneOf[0].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].oneOf[0].use[2]!./src/pages/home/index.css ***!
+  \************************************************************************************************************************************************************************************************/
+.home {
+  min-height: 100vh;
+  background-color: #FAFAF9;
+}
+
+.home-header {
+  background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%);
+  padding: 60rpx 20rpx 40rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 24rpx rgba(126, 34, 206, 0.2);
+}
+
+.home-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10rpx;
+  display: block;
+  text-shadow: 0 2rpx 8rpx rgba(126, 34, 206, 0.3);
+}
+
+.home-subtitle {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 30rpx;
+  display: block;
+  font-weight: 500;
+}
+
+.home-content {
+  padding: 20rpx;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+  margin-bottom: 30rpx;
+}
+
+.feature-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 36rpx 24rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 24rpx rgba(126, 34, 206, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1rpx solid rgba(126, 34, 206, 0.2);
+  backdrop-filter: blur(10rpx);
+}
+
+.feature-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12rpx 32rpx rgba(126, 34, 206, 0.2);
+  border-color: #9333EA;
+}
+
+.feature-card:active {
+  transform: scale(0.98);
+}
+
+.feature-icon {
+  font-size: 56rpx;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.feature-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #1C1917;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+.feature-desc {
+  font-size: 16rpx;
+  color: #44403C;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.compress-card {
+  background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%);
+  color: #fff;
+  border: 1rpx solid rgba(147, 51, 234, 0.3);
+}
+
+.compress-card .feature-title,
+.compress-card .feature-desc {
+  color: #fff;
+}
+
+.resize-card {
+  background: linear-gradient(135deg, #9333EA 0%, #A855F7 100%);
+  color: #fff;
+  border: 1rpx solid rgba(147, 51, 234, 0.3);
+}
+
+.resize-card .feature-title,
+.resize-card .feature-desc {
+  color: #fff;
+}
+
+.convert-card {
+  background: linear-gradient(135deg, #EA580C 0%, #FB923C 100%);
+  color: #fff;
+  border: 1rpx solid rgba(234, 88, 12, 0.3);
+}
+
+.convert-card .feature-title,
+.convert-card .feature-desc {
+  color: #fff;
+}
+
+.edit-card {
+  background: linear-gradient(135deg, #FB923C 0%, #FDBA74 100%);
+  color: #1C1917;
+  border: 1rpx solid rgba(234, 88, 12, 0.2);
+}
+
+.edit-card .feature-title,
+.edit-card .feature-desc {
+  color: #1C1917;
+}
+
+.filter-card {
+  background: linear-gradient(135deg, #FAFAF9 0%, #F5F5F4 100%);
+  color: #1C1917;
+  border: 1rpx solid rgba(126, 34, 206, 0.2);
+}
+
+.filter-card .feature-title,
+.filter-card .feature-desc {
+  color: #1C1917;
+}
+
+.footer {
+  text-align: center;
+  padding: 24rpx;
+  color: #44403C;
+  font-size: 16rpx;
+  font-weight: 500;
+  background: #FAFAF9;
+  border-top: 1rpx solid rgba(126, 34, 206, 0.1);
+}
+

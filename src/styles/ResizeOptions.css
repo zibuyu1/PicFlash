@@ -1,0 +1,63 @@
+.resize-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.option {
+  margin-bottom: 1.5rem;
+}
+
+.option label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #44403C;
+}
+
+.option input[type="number"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(126, 34, 206, 0.3);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #FAFAF9;
+  transition: all 0.3s ease;
+}
+
+.option input[type="number"]:focus {
+  outline: none;
+  border-color: #9333EA;
+  box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.1);
+}
+
+.presets {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.presets button {
+  padding: 0.625rem 1.25rem;
+  background-color: #FAFAF9;
+  border: 1px solid rgba(126, 34, 206, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #44403C;
+}
+
+.presets button:hover {
+  background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%);
+  color: white;
+  border-color: #9333EA;
+  box-shadow: 0 4px 12px rgba(126, 34, 206, 0.3);
+  transform: translateY(-2px);
+}
+
+.presets button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(126, 34, 206, 0.2);
+}

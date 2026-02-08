@@ -1,0 +1,18 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@10.9.0
+2 info using node@v22.12.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/wangjie/Desktop/uTools/.npmrc
+5 silly config load:file:/usr/local/etc/npmrc
+6 verbose title npm run build:weapp
+7 verbose argv "run" "build:weapp"
+8 verbose logfile logs-max:10 dir:/Users/wangjie/Desktop/uTools/.npm/_logs/2026-02-07T03_26_22_366Z-
+9 verbose logfile /Users/wangjie/Desktop/uTools/.npm/_logs/2026-02-07T03_26_22_366Z-debug-0.log
+10 silly logfile start cleaning logs, removing 1 files
+11 silly logfile done cleaning log files
+12 verbose cwd /Users/wangjie/Desktop/uTools
+13 verbose os Darwin 21.6.0
+14 verbose node v22.12.0
+15 verbose npm  v10.9.0
+16 verbose exit 0
+17 info ok
