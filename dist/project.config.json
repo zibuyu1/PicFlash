@@ -2,7 +2,7 @@
   "miniprogramRoot": "./",
   "projectname": "image-processing-tool",
   "description": "纯前端图片处理工具",
-  "appid": "wxe58af815a3f0f4af",
+  "appid": "touristappid",
   "setting": {
     "urlCheck": false,
     "es6": true,
@@ -37,20 +37,9 @@
     "disableUseStrict": false,
     "minifyWXML": true,
     "showES6CompileOption": false,
-    "useCompilerPlugins": false,
-    "compileWorklet": false,
-    "localPlugins": false,
-    "condition": false,
-    "swc": false,
-    "disableSWC": true
+    "useCompilerPlugins": false
   },
   "compileType": "miniprogram",
   "libVersion": "2.19.4",
-  "condition": {},
-  "simulatorPluginLibVersion": {},
-  "packOptions": {
-    "ignore": [],
-    "include": []
-  },
-  "editorSetting": {}
+  "condition": {}
 }

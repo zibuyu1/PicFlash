@@ -1,0 +1,66 @@
+.custom-header {
+  background-color: transparent;
+}
+
+.status-bar {
+  width: 100%;
+  background-color: transparent;
+}
+
+.custom-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background-color: transparent;
+}
+
+.custom-header-title {
+  flex: 1;
+  font-weight: 600;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.header-icon .icon {
+  font-size: 16px;
+  color: #333333;
+}
+
+.menu-icon {
+  font-weight: bold;
+}
+
+/* 适配不同屏幕尺寸 */
+@media screen and (max-width: 375px) {
+  .custom-header-title {
+    font-size: 16px;
+  }
+  
+  .custom-header-content {
+    padding: 0 16px;
+  }
+  
+  .custom-header-right {
+    gap: 16px;
+  }
+}

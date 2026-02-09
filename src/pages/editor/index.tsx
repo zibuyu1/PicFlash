@@ -191,10 +191,19 @@ const createImageProcessor = (canvasId) => {
     canvas.height = img.height
     ctx.drawImage(img, 0, 0)
 
+    // Taro.canvasToTempFilePath only supports 'jpg' and 'png'
+    let supportedFormat = format
+    if (format === 'jpeg') {
+      supportedFormat = 'jpg'
+    } else if (!['jpg', 'png'].includes(format)) {
+      // For unsupported formats, use 'png' as fallback
+      supportedFormat = 'png'
+    }
+
     return new Promise((resolve) => {
       Taro.canvasToTempFilePath({
         canvas: canvas,
-        fileType: format,
+        fileType: supportedFormat,
         success: (res) => {
           resolve(res.tempFilePath)
         }

@@ -7,15 +7,16 @@ export default {
   ],
   window: {
     backgroundTextStyle: 'dark',
-    navigationBarBackgroundColor: '#0F0F1A',
-    navigationBarTitleText: 'PicFlash AI',
-    navigationBarTextStyle: 'white'
+    navigationBarBackgroundColor: '#ffffff',
+    navigationBarTitleText: '',
+    navigationBarTextStyle: 'black',
+    navigationStyle: 'custom'
   },
   tabBar: {
-    color: '#A5B4FC',
-    selectedColor: '#6366F1',
-    backgroundColor: '#1A1A2E',
-    borderStyle: 'white',
+    color: '#666666',
+    selectedColor: '#333333',
+    backgroundColor: '#FFFFFF',
+    borderStyle: 'black',
     list: [
       {
         pagePath: 'pages/home/index',

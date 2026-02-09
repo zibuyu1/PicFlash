@@ -185,10 +185,19 @@ const createImageProcessor = canvasId => {
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
+
+    // Taro.canvasToTempFilePath only supports 'jpg' and 'png'
+    let supportedFormat = format;
+    if (format === 'jpeg') {
+      supportedFormat = 'jpg';
+    } else if (!['jpg', 'png'].includes(format)) {
+      // For unsupported formats, use 'png' as fallback
+      supportedFormat = 'png';
+    }
     return new Promise(resolve => {
       _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().canvasToTempFilePath({
         canvas: canvas,
-        fileType: format,
+        fileType: supportedFormat,
         success: res => {
           resolve(res.tempFilePath);
         }
@@ -869,26 +878,11 @@ const formatOptions = [{
   name: 'PNG',
   value: 'png'
 }, {
-  name: 'JPEG',
-  value: 'jpg'
-}, {
   name: 'JPG',
   value: 'jpg'
 }, {
-  name: 'WebP',
-  value: 'webp'
-}, {
-  name: 'TIFF',
-  value: 'tiff'
-}, {
-  name: 'AVIF',
-  value: 'avif'
-}, {
-  name: 'BMP',
-  value: 'bmp'
-}, {
-  name: 'GIF',
-  value: 'gif'
+  name: 'JPEG',
+  value: 'jpg'
 }];
 const ConvertFeature = ({
   onConvert

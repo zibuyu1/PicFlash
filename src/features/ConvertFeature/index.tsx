@@ -3,13 +3,8 @@ import { View, Text, Button } from '@tarojs/components'
 
 const formatOptions = [
   { name: 'PNG', value: 'png' },
-  { name: 'JPEG', value: 'jpg' },
   { name: 'JPG', value: 'jpg' },
-  { name: 'WebP', value: 'webp' },
-  { name: 'TIFF', value: 'tiff' },
-  { name: 'AVIF', value: 'avif' },
-  { name: 'BMP', value: 'bmp' },
-  { name: 'GIF', value: 'gif' },
+  { name: 'JPEG', value: 'jpg' },
 ]
 
 interface ConvertFeatureProps {
