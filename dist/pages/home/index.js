@@ -24,31 +24,31 @@ const Home = () => {
     title: '图片压缩',
     description: '智能压缩图片大小，保持画质清晰',
     icon: '📸',
-    className: 'feature-card compress-card'
+    className: 'feature-card compress-card hover-lift'
   }, {
     id: 'resize',
     title: '尺寸调整',
     description: '调整图片尺寸，支持多种证件照规格',
     icon: '📐',
-    className: 'feature-card resize-card'
+    className: 'feature-card resize-card hover-lift'
   }, {
     id: 'convert',
     title: '格式转换',
     description: '转换图片格式，支持多种常用格式',
     icon: '🔄',
-    className: 'feature-card convert-card'
+    className: 'feature-card convert-card hover-lift'
   }, {
     id: 'edit',
     title: '基础编辑',
     description: '旋转、翻转图片，简单编辑操作',
     icon: '✏️',
-    className: 'feature-card edit-card'
+    className: 'feature-card edit-card hover-lift'
   }, {
     id: 'filter',
     title: '滤镜效果',
     description: '添加滤镜效果，调整图片风格',
     icon: '🎨',
-    className: 'feature-card filter-card'
+    className: 'feature-card filter-card hover-lift'
   }];
   const handleFeatureClick = featureId => {
     _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().navigateTo({
@@ -56,23 +56,26 @@ const Home = () => {
     });
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-    className: "home",
+    className: "home scanline-effect",
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
       className: "home-header",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-        className: "home-title",
-        children: "\u56FE\u7247\u5904\u7406\u5DE5\u5177"
+        className: "home-title neon-text",
+        children: "PicFlash AI"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
         className: "home-subtitle",
-        children: "\u7B80\u5355\u3001\u9AD8\u6548\u7684\u56FE\u7247\u5904\u7406\u89E3\u51B3\u65B9\u6848"
+        children: "\u667A\u80FD\u56FE\u7247\u5904\u7406\u5E73\u53F0"
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
       className: "home-content",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
         className: "features-grid",
-        children: features.map(feature => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        children: features.map((feature, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
           className: feature.className,
           onClick: () => handleFeatureClick(feature.id),
+          style: {
+            animationDelay: `${index * 0.1}s`
+          },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
             className: "feature-icon",
             children: feature.icon
@@ -88,7 +91,7 @@ const Home = () => {
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
       className: "footer",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-        children: "\xA9 2026 \u56FE\u7247\u5904\u7406\u5DE5\u5177"
+        children: "\xA9 2026 PicFlash AI"
       })
     })]
   });

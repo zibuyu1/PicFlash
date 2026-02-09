@@ -1,7 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { View, Text, Button, Image, Canvas, Slider } from '@tarojs/components'
-import Taro, { useLoad } from '@tarojs/taro'
+import { View, Text, Button, Image, Canvas } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 import './index.css'
+
+import CompressFeature from '../../features/CompressFeature'
+import ResizeFeature from '../../features/ResizeFeature'
+import ConvertFeature from '../../features/ConvertFeature'
+import EditFeature from '../../features/EditFeature'
+import FilterFeature from '../../features/FilterFeature'
 
 const createImageProcessor = (canvasId) => {
   let canvas = null
@@ -68,25 +74,105 @@ const createImageProcessor = (canvasId) => {
     img,
     width,
     height,
-    maintainAspectRatio
+    scaleMode = 'cover'
   ) => {
     if (!canvas || !ctx) throw new Error('Canvas not initialized')
 
-    let finalWidth = width
-    let finalHeight = height
+    const imgAspectRatio = img.width / img.height
+    const targetAspectRatio = width / height
 
-    if (maintainAspectRatio) {
-      const aspectRatio = img.width / img.height
-      if (width / height > aspectRatio) {
-        finalWidth = height * aspectRatio
-      } else {
-        finalHeight = width / aspectRatio
-      }
+    let finalWidth, finalHeight, offsetX, offsetY
+
+    switch (scaleMode) {
+      case 'cover':
+        // 填满画面（裁边）
+        if (imgAspectRatio > targetAspectRatio) {
+          finalHeight = height
+          finalWidth = height * imgAspectRatio
+          offsetX = (width - finalWidth) / 2
+          offsetY = 0
+        } else {
+          finalWidth = width
+          finalHeight = width / imgAspectRatio
+          offsetX = 0
+          offsetY = (height - finalHeight) / 2
+        }
+        break
+      case 'contain':
+        // 完整显示（留空白）
+        if (imgAspectRatio > targetAspectRatio) {
+          finalWidth = width
+          finalHeight = width / imgAspectRatio
+          offsetX = 0
+          offsetY = (height - finalHeight) / 2
+        } else {
+          finalHeight = height
+          finalWidth = height * imgAspectRatio
+          offsetX = (width - finalWidth) / 2
+          offsetY = 0
+        }
+        break
+      case 'stretch':
+        // 拉伸填满（变形）
+        finalWidth = width
+        finalHeight = height
+        offsetX = 0
+        offsetY = 0
+        break
+      case 'keep':
+        // 保留完整（可能小）
+        if (img.width <= width && img.height <= height) {
+          // 图片尺寸小于目标尺寸，保持原图大小
+          finalWidth = img.width
+          finalHeight = img.height
+        } else if (imgAspectRatio > targetAspectRatio) {
+          finalWidth = width
+          finalHeight = width / imgAspectRatio
+        } else {
+          finalHeight = height
+          finalWidth = height * imgAspectRatio
+        }
+        offsetX = (width - finalWidth) / 2
+        offsetY = (height - finalHeight) / 2
+        break
+      case 'cover_min':
+        // 至少覆盖（可能超出）
+        if (imgAspectRatio > targetAspectRatio) {
+          finalWidth = width
+          finalHeight = width / imgAspectRatio
+          if (finalHeight < height) {
+            finalHeight = height
+            finalWidth = height * imgAspectRatio
+          }
+        } else {
+          finalHeight = height
+          finalWidth = height * imgAspectRatio
+          if (finalWidth < width) {
+            finalWidth = width
+            finalHeight = width / imgAspectRatio
+          }
+        }
+        offsetX = (width - finalWidth) / 2
+        offsetY = (height - finalHeight) / 2
+        break
+      default:
+        // 默认使用cover模式
+        if (imgAspectRatio > targetAspectRatio) {
+          finalHeight = height
+          finalWidth = height * imgAspectRatio
+          offsetX = (width - finalWidth) / 2
+          offsetY = 0
+        } else {
+          finalWidth = width
+          finalHeight = width / imgAspectRatio
+          offsetX = 0
+          offsetY = (height - finalHeight) / 2
+        }
     }
 
-    canvas.width = finalWidth
-    canvas.height = finalHeight
-    ctx.drawImage(img, 0, 0, finalWidth, finalHeight)
+    canvas.width = width
+    canvas.height = height
+    ctx.drawImage(img, offsetX, offsetY, finalWidth, finalHeight)
 
     return new Promise((resolve) => {
       Taro.canvasToTempFilePath({
@@ -223,39 +309,18 @@ const createImageProcessor = (canvasId) => {
   }
 }
 
-const sizeOptions = [
-  { name: '一寸', width: 295, height: 413 },
-  { name: '小二寸', width: 413, height: 531 },
-  { name: '二寸', width: 413, height: 626 },
-  { name: '社保/身份证', width: 358, height: 441 },
-  { name: '四六级/计算机', width: 144, height: 192 },
-  { name: '卫生机构', width: 160, height: 210 },
-  { name: '毕业证', width: 480, height: 640 }
-]
-
-const formatOptions = [
-  { name: 'PNG', value: 'png' },
-  { name: 'JPEG', value: 'jpg' },
-  { name: 'JPG', value: 'jpg' },
-  { name: 'WebP', value: 'webp' },
-  { name: 'TIFF', value: 'tiff' },
-  { name: 'AVIF', value: 'avif' },
-  { name: 'BMP', value: 'bmp' },
-  { name: 'GIF', value: 'gif' },
-  { name: 'ICO', value: 'ico' }
-]
-
 const Editor = () => {
   const [image, setImage] = useState(null)
   const [processedImage, setProcessedImage] = useState('')
   const [processedImageInfo, setProcessedImageInfo] = useState(null)
   const [processedImageSize, setProcessedImageSize] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [quality, setQuality] = useState(0.8)
   const [customQuality, setCustomQuality] = useState('80')
-  const [customWidth, setCustomWidth] = useState('800')
-  const [customHeight, setCustomHeight] = useState('600')
-  const [maintainAspectRatio, setMaintainAspectRatio] = useState(true)
   const [featureType, setFeatureType] = useState('compress')
+  const [scaleMode, setScaleMode] = useState('cover')
+  const [comparisonPosition, setComparisonPosition] = useState(50)
+  const [showOriginal, setShowOriginal] = useState(false)
   const processorRef = useRef(null)
 
   useEffect(() => {
@@ -264,10 +329,14 @@ const Editor = () => {
     processorRef.current.init()
 
     // 获取传递的功能类型参数
-    const pages = Taro.getCurrentPages()
-    const currentPage = pages[pages.length - 1]
-    if (currentPage.options && currentPage.options.type) {
-      setFeatureType(currentPage.options.type)
+    try {
+      const pages = Taro.getCurrentPages()
+      const currentPage = pages[pages.length - 1]
+      if (currentPage && currentPage.options && currentPage.options.type) {
+        setFeatureType(currentPage.options.type)
+      }
+    } catch (error) {
+      console.error('Error getting feature type:', error)
     }
   }, [])
 
@@ -300,10 +369,6 @@ const Editor = () => {
         icon: 'none'
       })
     }
-  }
-
-  const handleReupload = () => {
-    selectImage()
   }
 
   const selectImage = () => {
@@ -354,12 +419,12 @@ const Editor = () => {
     }
   }
 
-  const handleResize = async (width, height, maintainAspectRatio) => {
+  const handleResize = async (width, height, scaleMode) => {
     if (!image || !processorRef.current) return
 
     setIsProcessing(true)
     try {
-      const url = await processorRef.current.resize(image.img, width, height, maintainAspectRatio)
+      const url = await processorRef.current.resize(image.img, width, height, scaleMode)
       setProcessedImage(url)
       setProcessedImageSize({ width, height })
       
@@ -510,52 +575,34 @@ const Editor = () => {
     }
   }
 
-  const handleCustomCompress = async () => {
-    if (!image || !processorRef.current) return
-
-    let quality = parseInt(customQuality)
-    
-    // 限制输入范围
-    if (isNaN(quality)) {
-      Taro.showToast({
-        title: '请输入有效数字',
-        icon: 'none'
-      })
-      return
-    }
-    
-    // 限制在10-100之间
-    quality = Math.max(10, Math.min(100, quality))
-    setCustomQuality(quality.toString())
-    
-    // 转换为0-1之间的值
-    const qualityValue = quality / 100
-    
-    await handleCompress(qualityValue)
+  const handleComparisonStart = (e) => {
+    // 开始拖拽，不需要特殊处理
   }
 
-  const handleCustomResize = async () => {
-    if (!image || !processorRef.current) return
+  const handleComparisonMove = (e) => {
+    try {
+      // 简化处理：直接从事件对象中获取触摸点信息
+      // 小程序中的触摸事件格式
+      const touches = e.touches || (e.detail && e.detail.touches)
+      if (!touches || touches.length === 0) return
+      
+      const touch = touches[0]
+      const pageX = touch.pageX
+      if (!pageX) return
 
-    let width = parseInt(customWidth)
-    let height = parseInt(customHeight)
-    
-    // 限制输入范围
-    if (isNaN(width) || isNaN(height)) {
-      Taro.showToast({
-        title: '请输入有效数字',
-        icon: 'none'
-      })
-      return
+      // 获取屏幕宽度
+      const screenWidth = Taro.getSystemInfoSync().windowWidth
+      if (!screenWidth) return
+
+      // 计算位置百分比（基于屏幕宽度）
+      const position = (pageX / screenWidth) * 100
+      
+      // 限制位置在0-100%之间
+      const clampedPosition = Math.max(0, Math.min(100, position))
+      setComparisonPosition(clampedPosition)
+    } catch (error) {
+      console.error('Error in handleComparisonMove:', error)
     }
-    
-    // 限制最小值
-    width = Math.max(1, width)
-    height = Math.max(1, height)
-    setCustomWidth(width.toString())
-    setCustomHeight(height.toString())
-    
-    await handleResize(width, height, maintainAspectRatio)
   }
 
   const handleDownload = async () => {
@@ -585,265 +632,38 @@ const Editor = () => {
     switch (featureType) {
       case 'compress':
         return (
-          <View className="options-section">
-            <Text className="options-title">压缩选项</Text>
-            <View style={{ marginBottom: '20px' }}>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>质量: 0.8</Text>
-              <Button
-                className="action-btn"
-                onClick={() => {
-                  setCustomQuality('80')
-                  handleCompress(0.8)
-                }}
-                style={{ marginBottom: '10px' }}
-              >
-                压缩 (80%)
-              </Button>
-            </View>
-            <View style={{ marginBottom: '20px' }}>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>质量: 0.6</Text>
-              <Button
-                className="action-btn"
-                onClick={() => {
-                  setCustomQuality('60')
-                  handleCompress(0.6)
-                }}
-                style={{ marginBottom: '10px' }}
-              >
-                压缩 (60%)
-              </Button>
-            </View>
-            <View style={{ marginBottom: '20px' }}>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>质量: 0.4</Text>
-              <Button
-                className="action-btn"
-                onClick={() => {
-                  setCustomQuality('40')
-                  handleCompress(0.4)
-                }}
-                style={{ marginBottom: '10px' }}
-              >
-                压缩 (40%)
-              </Button>
-            </View>
-            <View>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>自定义质量: {customQuality}%</Text>
-              <View style={{ marginBottom: '20px' }}>
-                <Slider
-                  value={parseInt(customQuality)}
-                  min={10}
-                  max={100}
-                  step={1}
-                  onChange={(e) => setCustomQuality(e.detail.value.toString())}
-                  style={{ width: '100%' }}
-                />
-              </View>
-              <Button
-                className="action-btn"
-                onClick={handleCustomCompress}
-              >
-                自定义压缩
-              </Button>
-            </View>
-          </View>
+          <CompressFeature
+            quality={quality}
+            onQualityChange={(newQuality) => {
+              setQuality(newQuality)
+              setCustomQuality(Math.round(newQuality * 100).toString())
+            }}
+            onCompress={handleCompress}
+          />
         )
       
       case 'resize':
         return (
-          <View className="options-section">
-            <Text className="options-title">尺寸选项</Text>
-            {sizeOptions.map((option, index) => (
-              <View key={index} className="size-option">
-                <Text className="size-option-label">{option.name} ({option.width}x{option.height})</Text>
-                <Button
-                  className="size-option-btn"
-                  onClick={() => {
-                    setCustomWidth(option.width.toString())
-                    setCustomHeight(option.height.toString())
-                    handleResize(option.width, option.height, true)
-                  }}
-                >
-                  调整尺寸
-                </Button>
-              </View>
-            ))}
-            <View>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>自定义尺寸</Text>
-              <View style={{ marginBottom: '15px' }}>
-                <View style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: '14px', color: '#666', marginBottom: '5px', display: 'block' }}>宽度</Text>
-                    <input
-                      type="number"
-                      value={customWidth}
-                      onChange={(e) => setCustomWidth(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #ddd',
-                        borderRadius: '8px',
-                        fontSize: '16px'
-                      }}
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: '14px', color: '#666', marginBottom: '5px', display: 'block' }}>高度</Text>
-                    <input
-                      type="number"
-                      value={customHeight}
-                      onChange={(e) => setCustomHeight(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #ddd',
-                        borderRadius: '8px',
-                        fontSize: '16px'
-                      }}
-                    />
-                  </View>
-                </View>
-                <View style={{ marginBottom: '10px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <input
-                      type="checkbox"
-                      checked={maintainAspectRatio}
-                      onChange={(e) => setMaintainAspectRatio(e.target.checked)}
-                    />
-                    <Text style={{ fontSize: '14px', color: '#666' }}>保持比例</Text>
-                  </label>
-                </View>
-              </View>
-              <Button
-                className="action-btn"
-                onClick={handleCustomResize}
-              >
-                自定义调整
-              </Button>
-            </View>
-          </View>
+          <ResizeFeature
+            scaleMode={scaleMode}
+            onScaleModeChange={setScaleMode}
+            onResize={handleResize}
+          />
         )
       
       case 'convert':
         return (
-          <View className="options-section">
-            <Text className="options-title">格式转换</Text>
-            <View className="format-grid">
-              {formatOptions.map((format, index) => (
-                <Button
-                  key={index}
-                  className="format-btn"
-                  onClick={() => handleConvert(format.value)}
-                >
-                  {format.name}
-                </Button>
-              ))}
-            </View>
-          </View>
+          <ConvertFeature onConvert={handleConvert} />
         )
       
       case 'edit':
         return (
-          <View className="options-section">
-            <Text className="options-title">编辑选项</Text>
-            <View style={{ marginBottom: '20px' }}>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>旋转</Text>
-              <View className="edit-buttons">
-                <Button
-                  className="action-btn"
-                  onClick={() => handleRotate(-90)}
-                >
-                  左转90°
-                </Button>
-                <Button
-                  className="action-btn"
-                  onClick={() => handleRotate(90)}
-                >
-                  右转90°
-                </Button>
-                <Button
-                  className="action-btn"
-                  onClick={() => handleRotate(180)}
-                >
-                  180°
-                </Button>
-              </View>
-            </View>
-            <View>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>翻转</Text>
-              <View className="edit-buttons">
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFlip('horizontal')}
-                >
-                  水平翻转
-                </Button>
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFlip('vertical')}
-                >
-                  垂直翻转
-                </Button>
-              </View>
-            </View>
-          </View>
+          <EditFeature onRotate={handleRotate} onFlip={handleFlip} />
         )
       
       case 'filter':
         return (
-          <View className="options-section">
-            <Text className="options-title">滤镜效果</Text>
-            <View style={{ marginBottom: '20px' }}>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>黑白</Text>
-              <View className="filter-buttons">
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFilter('grayscale', 50)}
-                >
-                  50%
-                </Button>
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFilter('grayscale', 100)}
-                >
-                  100%
-                </Button>
-              </View>
-            </View>
-            <View style={{ marginBottom: '20px' }}>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>复古</Text>
-              <View className="filter-buttons">
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFilter('sepia', 50)}
-                >
-                  50%
-                </Button>
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFilter('sepia', 100)}
-                >
-                  100%
-                </Button>
-              </View>
-            </View>
-            <View>
-              <Text style={{ fontSize: '16px', color: '#666', marginBottom: '10px', display: 'block' }}>亮度</Text>
-              <View className="filter-buttons">
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFilter('brightness', 120)}
-                >
-                  增亮
-                </Button>
-                <Button
-                  className="action-btn"
-                  onClick={() => handleFilter('brightness', 80)}
-                >
-                  变暗
-                </Button>
-              </View>
-            </View>
-          </View>
+          <FilterFeature onFilter={handleFilter} />
         )
       
       default:
@@ -860,29 +680,77 @@ const Editor = () => {
         style={{ width: '0px', height: '0px', position: 'fixed', left: '-9999px' }}
       />
 
-      {/* 客服按钮 */}
-      <View className="customer-service-btn">
-        <Text className="service-icon">💬</Text>
-        <Text className="service-text">客服</Text>
-      </View>
-
       <View className="editor-content">
-        {/* 合并的图片显示和操作区域 */}
-        <View className="scrollable-content">
+        <View className="upload-content">
           {!image ? (
             <View className="upload-placeholder" onClick={selectImage}>
               <Text className="upload-icon">🖼️</Text>
               <Text className="upload-text">点击选择图片{featureType === 'compress' ? '压缩' : ''}</Text>
-              <Button
-                className="action-btn"
-                onClick={(e) => {
-                  e.stopPropagation() // 阻止事件冒泡
-                  selectImage()
-                }}
-                style={{ marginTop: '20px', width: '80%' }}
-              >
-                选择图片
-              </Button>
+            </View>
+          ) : processedImage ? (
+            <View className="comparison-container">
+              {/* 简化的对比视图，使用按钮切换 */}
+              <View className="comparison-wrapper" style={{ position: 'relative' }}>
+                {/* 显示图片 */}
+                <Image
+                  src={showOriginal ? image.src : processedImage}
+                  style={{
+                    width: '100%',
+                    height: '400rpx',
+                    objectFit: 'contain'
+                  }}
+                  mode="aspectFit"
+                />
+                
+                {/* 切换按钮（放在图片上面） */}
+                <View style={{ 
+                  position: 'absolute', 
+                  top: '15rpx', 
+                  right: '15rpx', 
+                  display: 'flex', 
+                  gap: '10rpx',
+                  zIndex: 10
+                }}>
+                  <View 
+                    style={{
+                      padding: '8rpx 16rpx',
+                      borderRadius: '8rpx',
+                      backgroundColor: showOriginal ? '#6366f1' : 'rgba(30, 27, 75, 0.8)',
+                      border: '1rpx solid #6366f1',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    onClick={() => setShowOriginal(true)}
+                  >
+                    <Text style={{ 
+                      fontSize: '12rpx', 
+                      color: showOriginal ? 'white' : '#94a3b8',
+                      fontWeight: showOriginal ? '600' : '400'
+                    }}>
+                      原图
+                    </Text>
+                  </View>
+                  <View 
+                    style={{
+                      padding: '8rpx 16rpx',
+                      borderRadius: '8rpx',
+                      backgroundColor: !showOriginal ? '#6366f1' : 'rgba(30, 27, 75, 0.8)',
+                      border: '1rpx solid #6366f1',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    onClick={() => setShowOriginal(false)}
+                  >
+                    <Text style={{ 
+                      fontSize: '12rpx', 
+                      color: !showOriginal ? 'white' : '#94a3b8',
+                      fontWeight: !showOriginal ? '600' : '400'
+                    }}>
+                      处理后
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
           ) : (
             <>
@@ -892,19 +760,12 @@ const Editor = () => {
                   className="preview-image"
                   mode="aspectFit"
                 />
-                <View className="image-info-bar">
-                  <Text className="image-size-text">
-                    图片{featureType === 'compress' ? '压缩' : ''}前: {(image.file.size / 1024).toFixed(2)} KB
-                  </Text>
-                  <Text className="info-separator">|</Text>
-                  <Text className="image-size-text">
-                    图片{featureType === 'compress' ? '压缩' : ''}后: {processedImageInfo ? (processedImageInfo.size / 1024).toFixed(2) : '0'} KB
-                  </Text>
-                </View>
               </View>
-              {renderFeatureOptions()}
             </>
           )}
+        </View>
+        <View className="scrollable-content">
+          {renderFeatureOptions()}
         </View>
 
         {/* 底部固定按钮区域 */}

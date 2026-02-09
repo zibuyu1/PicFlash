@@ -12,7 +12,17 @@
 /* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
 /* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tarojs/taro */ "./node_modules/@tarojs/taro/index.js");
 /* harmony import */ var _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_tarojs_taro__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+/* harmony import */ var _features_CompressFeature__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../features/CompressFeature */ "./src/features/CompressFeature/index.tsx");
+/* harmony import */ var _features_ResizeFeature__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../features/ResizeFeature */ "./src/features/ResizeFeature/index.tsx");
+/* harmony import */ var _features_ConvertFeature__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../features/ConvertFeature */ "./src/features/ConvertFeature/index.tsx");
+/* harmony import */ var _features_EditFeature__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../features/EditFeature */ "./src/features/EditFeature/index.tsx");
+/* harmony import */ var _features_FilterFeature__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../features/FilterFeature */ "./src/features/FilterFeature/index.tsx");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+
 
 
 
@@ -67,21 +77,100 @@ const createImageProcessor = canvasId => {
       });
     });
   };
-  const resize = (img, width, height, maintainAspectRatio) => {
+  const resize = (img, width, height, scaleMode = 'cover') => {
     if (!canvas || !ctx) throw new Error('Canvas not initialized');
-    let finalWidth = width;
-    let finalHeight = height;
-    if (maintainAspectRatio) {
-      const aspectRatio = img.width / img.height;
-      if (width / height > aspectRatio) {
-        finalWidth = height * aspectRatio;
-      } else {
-        finalHeight = width / aspectRatio;
-      }
+    const imgAspectRatio = img.width / img.height;
+    const targetAspectRatio = width / height;
+    let finalWidth, finalHeight, offsetX, offsetY;
+    switch (scaleMode) {
+      case 'cover':
+        // 填满画面（裁边）
+        if (imgAspectRatio > targetAspectRatio) {
+          finalHeight = height;
+          finalWidth = height * imgAspectRatio;
+          offsetX = (width - finalWidth) / 2;
+          offsetY = 0;
+        } else {
+          finalWidth = width;
+          finalHeight = width / imgAspectRatio;
+          offsetX = 0;
+          offsetY = (height - finalHeight) / 2;
+        }
+        break;
+      case 'contain':
+        // 完整显示（留空白）
+        if (imgAspectRatio > targetAspectRatio) {
+          finalWidth = width;
+          finalHeight = width / imgAspectRatio;
+          offsetX = 0;
+          offsetY = (height - finalHeight) / 2;
+        } else {
+          finalHeight = height;
+          finalWidth = height * imgAspectRatio;
+          offsetX = (width - finalWidth) / 2;
+          offsetY = 0;
+        }
+        break;
+      case 'stretch':
+        // 拉伸填满（变形）
+        finalWidth = width;
+        finalHeight = height;
+        offsetX = 0;
+        offsetY = 0;
+        break;
+      case 'keep':
+        // 保留完整（可能小）
+        if (img.width <= width && img.height <= height) {
+          // 图片尺寸小于目标尺寸，保持原图大小
+          finalWidth = img.width;
+          finalHeight = img.height;
+        } else if (imgAspectRatio > targetAspectRatio) {
+          finalWidth = width;
+          finalHeight = width / imgAspectRatio;
+        } else {
+          finalHeight = height;
+          finalWidth = height * imgAspectRatio;
+        }
+        offsetX = (width - finalWidth) / 2;
+        offsetY = (height - finalHeight) / 2;
+        break;
+      case 'cover_min':
+        // 至少覆盖（可能超出）
+        if (imgAspectRatio > targetAspectRatio) {
+          finalWidth = width;
+          finalHeight = width / imgAspectRatio;
+          if (finalHeight < height) {
+            finalHeight = height;
+            finalWidth = height * imgAspectRatio;
+          }
+        } else {
+          finalHeight = height;
+          finalWidth = height * imgAspectRatio;
+          if (finalWidth < width) {
+            finalWidth = width;
+            finalHeight = width / imgAspectRatio;
+          }
+        }
+        offsetX = (width - finalWidth) / 2;
+        offsetY = (height - finalHeight) / 2;
+        break;
+      default:
+        // 默认使用cover模式
+        if (imgAspectRatio > targetAspectRatio) {
+          finalHeight = height;
+          finalWidth = height * imgAspectRatio;
+          offsetX = (width - finalWidth) / 2;
+          offsetY = 0;
+        } else {
+          finalWidth = width;
+          finalHeight = width / imgAspectRatio;
+          offsetX = 0;
+          offsetY = (height - finalHeight) / 2;
+        }
     }
-    canvas.width = finalWidth;
-    canvas.height = finalHeight;
-    ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
+    canvas.width = width;
+    canvas.height = height;
+    ctx.drawImage(img, offsetX, offsetY, finalWidth, finalHeight);
     return new Promise(resolve => {
       _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().canvasToTempFilePath({
         canvas: canvas,
@@ -192,74 +281,18 @@ const createImageProcessor = canvasId => {
     applyFilter
   };
 };
-const sizeOptions = [{
-  name: '一寸',
-  width: 295,
-  height: 413
-}, {
-  name: '小二寸',
-  width: 413,
-  height: 531
-}, {
-  name: '二寸',
-  width: 413,
-  height: 626
-}, {
-  name: '社保/身份证',
-  width: 358,
-  height: 441
-}, {
-  name: '四六级/计算机',
-  width: 144,
-  height: 192
-}, {
-  name: '卫生机构',
-  width: 160,
-  height: 210
-}, {
-  name: '毕业证',
-  width: 480,
-  height: 640
-}];
-const formatOptions = [{
-  name: 'PNG',
-  value: 'png'
-}, {
-  name: 'JPEG',
-  value: 'jpg'
-}, {
-  name: 'JPG',
-  value: 'jpg'
-}, {
-  name: 'WebP',
-  value: 'webp'
-}, {
-  name: 'TIFF',
-  value: 'tiff'
-}, {
-  name: 'AVIF',
-  value: 'avif'
-}, {
-  name: 'BMP',
-  value: 'bmp'
-}, {
-  name: 'GIF',
-  value: 'gif'
-}, {
-  name: 'ICO',
-  value: 'ico'
-}];
 const Editor = () => {
   const [image, setImage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
   const [processedImage, setProcessedImage] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
   const [processedImageInfo, setProcessedImageInfo] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
   const [processedImageSize, setProcessedImageSize] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
   const [isProcessing, setIsProcessing] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [quality, setQuality] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0.8);
   const [customQuality, setCustomQuality] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('80');
-  const [customWidth, setCustomWidth] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('800');
-  const [customHeight, setCustomHeight] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('600');
-  const [maintainAspectRatio, setMaintainAspectRatio] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true);
   const [featureType, setFeatureType] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('compress');
+  const [scaleMode, setScaleMode] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('cover');
+  const [comparisonPosition, setComparisonPosition] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(50);
+  const [showOriginal, setShowOriginal] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
   const processorRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     console.log('Editor page loaded.');
@@ -267,10 +300,14 @@ const Editor = () => {
     processorRef.current.init();
 
     // 获取传递的功能类型参数
-    const pages = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getCurrentPages();
-    const currentPage = pages[pages.length - 1];
-    if (currentPage.options && currentPage.options.type) {
-      setFeatureType(currentPage.options.type);
+    try {
+      const pages = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getCurrentPages();
+      const currentPage = pages[pages.length - 1];
+      if (currentPage && currentPage.options && currentPage.options.type) {
+        setFeatureType(currentPage.options.type);
+      }
+    } catch (error) {
+      console.error('Error getting feature type:', error);
     }
   }, []);
   const handleImageSelect = async tempFilePath => {
@@ -302,9 +339,6 @@ const Editor = () => {
         icon: 'none'
       });
     }
-  };
-  const handleReupload = () => {
-    selectImage();
   };
   const selectImage = () => {
     _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().chooseImage({
@@ -352,11 +386,11 @@ const Editor = () => {
       setIsProcessing(false);
     }
   };
-  const handleResize = async (width, height, maintainAspectRatio) => {
+  const handleResize = async (width, height, scaleMode) => {
     if (!image || !processorRef.current) return;
     setIsProcessing(true);
     try {
-      const url = await processorRef.current.resize(image.img, width, height, maintainAspectRatio);
+      const url = await processorRef.current.resize(image.img, width, height, scaleMode);
       setProcessedImage(url);
       setProcessedImageSize({
         width,
@@ -506,47 +540,32 @@ const Editor = () => {
       setIsProcessing(false);
     }
   };
-  const handleCustomCompress = async () => {
-    if (!image || !processorRef.current) return;
-    let quality = parseInt(customQuality);
-
-    // 限制输入范围
-    if (isNaN(quality)) {
-      _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().showToast({
-        title: '请输入有效数字',
-        icon: 'none'
-      });
-      return;
-    }
-
-    // 限制在10-100之间
-    quality = Math.max(10, Math.min(100, quality));
-    setCustomQuality(quality.toString());
-
-    // 转换为0-1之间的值
-    const qualityValue = quality / 100;
-    await handleCompress(qualityValue);
+  const handleComparisonStart = e => {
+    // 开始拖拽，不需要特殊处理
   };
-  const handleCustomResize = async () => {
-    if (!image || !processorRef.current) return;
-    let width = parseInt(customWidth);
-    let height = parseInt(customHeight);
+  const handleComparisonMove = e => {
+    try {
+      // 简化处理：直接从事件对象中获取触摸点信息
+      // 小程序中的触摸事件格式
+      const touches = e.touches || e.detail && e.detail.touches;
+      if (!touches || touches.length === 0) return;
+      const touch = touches[0];
+      const pageX = touch.pageX;
+      if (!pageX) return;
 
-    // 限制输入范围
-    if (isNaN(width) || isNaN(height)) {
-      _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().showToast({
-        title: '请输入有效数字',
-        icon: 'none'
-      });
-      return;
+      // 获取屏幕宽度
+      const screenWidth = _tarojs_taro__WEBPACK_IMPORTED_MODULE_2___default().getSystemInfoSync().windowWidth;
+      if (!screenWidth) return;
+
+      // 计算位置百分比（基于屏幕宽度）
+      const position = pageX / screenWidth * 100;
+
+      // 限制位置在0-100%之间
+      const clampedPosition = Math.max(0, Math.min(100, position));
+      setComparisonPosition(clampedPosition);
+    } catch (error) {
+      console.error('Error in handleComparisonMove:', error);
     }
-
-    // 限制最小值
-    width = Math.max(1, width);
-    height = Math.max(1, height);
-    setCustomWidth(width.toString());
-    setCustomHeight(height.toString());
-    await handleResize(width, height, maintainAspectRatio);
   };
   const handleDownload = async () => {
     if (!processedImage) return;
@@ -572,384 +591,40 @@ const Editor = () => {
   const renderFeatureOptions = () => {
     switch (featureType) {
       case 'compress':
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-          className: "options-section",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-            className: "options-title",
-            children: "\u538B\u7F29\u9009\u9879"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            style: {
-              marginBottom: '20px'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u8D28\u91CF: 0.8"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "action-btn",
-              onClick: () => {
-                setCustomQuality('80');
-                handleCompress(0.8);
-              },
-              style: {
-                marginBottom: '10px'
-              },
-              children: "\u538B\u7F29 (80%)"
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            style: {
-              marginBottom: '20px'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u8D28\u91CF: 0.6"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "action-btn",
-              onClick: () => {
-                setCustomQuality('60');
-                handleCompress(0.6);
-              },
-              style: {
-                marginBottom: '10px'
-              },
-              children: "\u538B\u7F29 (60%)"
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            style: {
-              marginBottom: '20px'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u8D28\u91CF: 0.4"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "action-btn",
-              onClick: () => {
-                setCustomQuality('40');
-                handleCompress(0.4);
-              },
-              style: {
-                marginBottom: '10px'
-              },
-              children: "\u538B\u7F29 (40%)"
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: ["\u81EA\u5B9A\u4E49\u8D28\u91CF: ", customQuality, "%"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              style: {
-                marginBottom: '20px'
-              },
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Slider, {
-                value: parseInt(customQuality),
-                min: 10,
-                max: 100,
-                step: 1,
-                onChange: e => setCustomQuality(e.detail.value.toString()),
-                style: {
-                  width: '100%'
-                }
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "action-btn",
-              onClick: handleCustomCompress,
-              children: "\u81EA\u5B9A\u4E49\u538B\u7F29"
-            })]
-          })]
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_features_CompressFeature__WEBPACK_IMPORTED_MODULE_3__["default"], {
+          quality: quality,
+          onQualityChange: newQuality => {
+            setQuality(newQuality);
+            setCustomQuality(Math.round(newQuality * 100).toString());
+          },
+          onCompress: handleCompress
         });
       case 'resize':
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-          className: "options-section",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-            className: "options-title",
-            children: "\u5C3A\u5BF8\u9009\u9879"
-          }), sizeOptions.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            className: "size-option",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              className: "size-option-label",
-              children: [option.name, " (", option.width, "x", option.height, ")"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "size-option-btn",
-              onClick: () => {
-                setCustomWidth(option.width.toString());
-                setCustomHeight(option.height.toString());
-                handleResize(option.width, option.height, true);
-              },
-              children: "\u8C03\u6574\u5C3A\u5BF8"
-            })]
-          }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u81EA\u5B9A\u4E49\u5C3A\u5BF8"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              style: {
-                marginBottom: '15px'
-              },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-                style: {
-                  display: 'flex',
-                  gap: '10px',
-                  marginBottom: '10px'
-                },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-                  style: {
-                    flex: 1
-                  },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-                    style: {
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '5px',
-                      display: 'block'
-                    },
-                    children: "\u5BBD\u5EA6"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
-                    type: "number",
-                    value: customWidth,
-                    onChange: e => setCustomWidth(e.target.value),
-                    style: {
-                      width: '100%',
-                      padding: '10px',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '16px'
-                    }
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-                  style: {
-                    flex: 1
-                  },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-                    style: {
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '5px',
-                      display: 'block'
-                    },
-                    children: "\u9AD8\u5EA6"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
-                    type: "number",
-                    value: customHeight,
-                    onChange: e => setCustomHeight(e.target.value),
-                    style: {
-                      width: '100%',
-                      padding: '10px',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '16px'
-                    }
-                  })]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-                style: {
-                  marginBottom: '10px'
-                },
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("label", {
-                  style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px'
-                  },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
-                    type: "checkbox",
-                    checked: maintainAspectRatio,
-                    onChange: e => setMaintainAspectRatio(e.target.checked)
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-                    style: {
-                      fontSize: '14px',
-                      color: '#666'
-                    },
-                    children: "\u4FDD\u6301\u6BD4\u4F8B"
-                  })]
-                })
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "action-btn",
-              onClick: handleCustomResize,
-              children: "\u81EA\u5B9A\u4E49\u8C03\u6574"
-            })]
-          })]
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_features_ResizeFeature__WEBPACK_IMPORTED_MODULE_4__["default"], {
+          scaleMode: scaleMode,
+          onScaleModeChange: setScaleMode,
+          onResize: handleResize
         });
       case 'convert':
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-          className: "options-section",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-            className: "options-title",
-            children: "\u683C\u5F0F\u8F6C\u6362"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            className: "format-grid",
-            children: formatOptions.map((format, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-              className: "format-btn",
-              onClick: () => handleConvert(format.value),
-              children: format.name
-            }, index))
-          })]
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_features_ConvertFeature__WEBPACK_IMPORTED_MODULE_5__["default"], {
+          onConvert: handleConvert
         });
       case 'edit':
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-          className: "options-section",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-            className: "options-title",
-            children: "\u7F16\u8F91\u9009\u9879"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            style: {
-              marginBottom: '20px'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u65CB\u8F6C"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              className: "edit-buttons",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleRotate(-90),
-                children: "\u5DE6\u8F6C90\xB0"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleRotate(90),
-                children: "\u53F3\u8F6C90\xB0"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleRotate(180),
-                children: "180\xB0"
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u7FFB\u8F6C"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              className: "edit-buttons",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFlip('horizontal'),
-                children: "\u6C34\u5E73\u7FFB\u8F6C"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFlip('vertical'),
-                children: "\u5782\u76F4\u7FFB\u8F6C"
-              })]
-            })]
-          })]
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_features_EditFeature__WEBPACK_IMPORTED_MODULE_6__["default"], {
+          onRotate: handleRotate,
+          onFlip: handleFlip
         });
       case 'filter':
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-          className: "options-section",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-            className: "options-title",
-            children: "\u6EE4\u955C\u6548\u679C"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            style: {
-              marginBottom: '20px'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u9ED1\u767D"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              className: "filter-buttons",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFilter('grayscale', 50),
-                children: "50%"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFilter('grayscale', 100),
-                children: "100%"
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            style: {
-              marginBottom: '20px'
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u590D\u53E4"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              className: "filter-buttons",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFilter('sepia', 50),
-                children: "50%"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFilter('sepia', 100),
-                children: "100%"
-              })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-              style: {
-                fontSize: '16px',
-                color: '#666',
-                marginBottom: '10px',
-                display: 'block'
-              },
-              children: "\u4EAE\u5EA6"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              className: "filter-buttons",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFilter('brightness', 120),
-                children: "\u589E\u4EAE"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-                className: "action-btn",
-                onClick: () => handleFilter('brightness', 80),
-                children: "\u53D8\u6697"
-              })]
-            })]
-          })]
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_features_FilterFeature__WEBPACK_IMPORTED_MODULE_7__["default"], {
+          onFilter: handleFilter
         });
       default:
         return null;
     }
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
     className: "editor",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Canvas, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Canvas, {
       id: "imageCanvas",
       canvasId: "imageCanvas",
       type: "2d",
@@ -959,76 +634,110 @@ const Editor = () => {
         position: 'fixed',
         left: '-9999px'
       }
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-      className: "customer-service-btn",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-        className: "service-icon",
-        children: "\uD83D\uDCAC"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-        className: "service-text",
-        children: "\u5BA2\u670D"
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
       className: "editor-content",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-        className: "scrollable-content",
-        children: !image ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "upload-content",
+        children: !image ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
           className: "upload-placeholder",
           onClick: selectImage,
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
             className: "upload-icon",
             children: "\uD83D\uDDBC\uFE0F"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
             className: "upload-text",
             children: ["\u70B9\u51FB\u9009\u62E9\u56FE\u7247", featureType === 'compress' ? '压缩' : '']
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
-            className: "action-btn",
-            onClick: e => {
-              e.stopPropagation(); // 阻止事件冒泡
-              selectImage();
-            },
-            style: {
-              marginTop: '20px',
-              width: '80%'
-            },
-            children: "\u9009\u62E9\u56FE\u7247"
           })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        }) : processedImage ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+          className: "comparison-container",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+            className: "comparison-wrapper",
+            style: {
+              position: 'relative'
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Image, {
+              src: showOriginal ? image.src : processedImage,
+              style: {
+                width: '100%',
+                height: '400rpx',
+                objectFit: 'contain'
+              },
+              mode: "aspectFit"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+              style: {
+                position: 'absolute',
+                top: '15rpx',
+                right: '15rpx',
+                display: 'flex',
+                gap: '10rpx',
+                zIndex: 10
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+                style: {
+                  padding: '8rpx 16rpx',
+                  borderRadius: '8rpx',
+                  backgroundColor: showOriginal ? '#6366f1' : 'rgba(30, 27, 75, 0.8)',
+                  border: '1rpx solid #6366f1',
+                  display: 'flex',
+                  alignItems: 'center'
+                },
+                onClick: () => setShowOriginal(true),
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+                  style: {
+                    fontSize: '12rpx',
+                    color: showOriginal ? 'white' : '#94a3b8',
+                    fontWeight: showOriginal ? '600' : '400'
+                  },
+                  children: "\u539F\u56FE"
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+                style: {
+                  padding: '8rpx 16rpx',
+                  borderRadius: '8rpx',
+                  backgroundColor: !showOriginal ? '#6366f1' : 'rgba(30, 27, 75, 0.8)',
+                  border: '1rpx solid #6366f1',
+                  display: 'flex',
+                  alignItems: 'center'
+                },
+                onClick: () => setShowOriginal(false),
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+                  style: {
+                    fontSize: '12rpx',
+                    color: !showOriginal ? 'white' : '#94a3b8',
+                    fontWeight: !showOriginal ? '600' : '400'
+                  },
+                  children: "\u5904\u7406\u540E"
+                })
+              })]
+            })]
+          })
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.Fragment, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
             className: "image-preview-section",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Image, {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Image, {
               src: image.src,
               className: "preview-image",
               mode: "aspectFit"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
-              className: "image-info-bar",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-                className: "image-size-text",
-                children: ["\u56FE\u7247", featureType === 'compress' ? '压缩' : '', "\u524D: ", (image.file.size / 1024).toFixed(2), " KB"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-                className: "info-separator",
-                children: "|"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
-                className: "image-size-text",
-                children: ["\u56FE\u7247", featureType === 'compress' ? '压缩' : '', "\u540E: ", processedImageInfo ? (processedImageInfo.size / 1024).toFixed(2) : '0', " KB"]
-              })]
-            })]
-          }), renderFeatureOptions()]
+            })
+          })
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "scrollable-content",
+        children: renderFeatureOptions()
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
         className: "bottom-buttons",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           className: "bottom-btn select-btn",
           onClick: selectImage,
           children: "\u9009\u62E9\u56FE\u7247"
-        }), processedImage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        }), processedImage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
           className: "bottom-btn save-btn",
           onClick: handleDownload,
           children: "\u4FDD\u5B58\u56FE\u7247"
         })]
-      }), isProcessing && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      }), isProcessing && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
         className: "loading-overlay",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
           className: "loading-text",
           children: "\u5904\u7406\u4E2D..."
         })
@@ -1037,6 +746,442 @@ const Editor = () => {
   });
 };
 /* harmony default export */ __webpack_exports__["default"] = (Editor);
+
+/***/ }),
+
+/***/ "./src/components/CompressOptions.tsx":
+/*!********************************************!*\
+  !*** ./src/components/CompressOptions.tsx ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CompressOptions: function() { return /* binding */ CompressOptions; }
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+const qualityOptions = [{
+  label: '低质量',
+  value: 0.3,
+  description: '30%'
+}, {
+  label: '中等质量',
+  value: 0.5,
+  description: '50%'
+}, {
+  label: '高质量',
+  value: 0.7,
+  description: '70%'
+}, {
+  label: '最佳质量',
+  value: 0.9,
+  description: '90%'
+}];
+const CompressOptions = ({
+  quality,
+  onQualityChange,
+  onCompress,
+  className = ''
+}) => {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    className: `compress-options ${className}`,
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      className: "option",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "size-option",
+        children: qualityOptions.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "size-option-btn",
+          onClick: () => {
+            onQualityChange(option.value);
+            onCompress(option.value);
+          },
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+            className: "quality-label",
+            children: option.label
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+            className: "quality-desc",
+            children: ["(", option.description, ")"]
+          })]
+        }, index))
+      })
+    })
+  });
+};
+
+/***/ }),
+
+/***/ "./src/features/CompressFeature/index.tsx":
+/*!************************************************!*\
+  !*** ./src/features/CompressFeature/index.tsx ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var _components_CompressOptions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../components/CompressOptions */ "./src/components/CompressOptions.tsx");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+
+const CompressFeature = ({
+  quality,
+  onQualityChange,
+  onCompress
+}) => {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    className: "options-section",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+      className: "options-title",
+      children: "\u538B\u7F29\u9009\u9879"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_components_CompressOptions__WEBPACK_IMPORTED_MODULE_2__.CompressOptions, {
+      quality: quality,
+      onQualityChange: onQualityChange,
+      onCompress: onCompress
+    })]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (CompressFeature);
+
+/***/ }),
+
+/***/ "./src/features/ConvertFeature/index.tsx":
+/*!***********************************************!*\
+  !*** ./src/features/ConvertFeature/index.tsx ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+const formatOptions = [{
+  name: 'PNG',
+  value: 'png'
+}, {
+  name: 'JPEG',
+  value: 'jpg'
+}, {
+  name: 'JPG',
+  value: 'jpg'
+}, {
+  name: 'WebP',
+  value: 'webp'
+}, {
+  name: 'TIFF',
+  value: 'tiff'
+}, {
+  name: 'AVIF',
+  value: 'avif'
+}, {
+  name: 'BMP',
+  value: 'bmp'
+}, {
+  name: 'GIF',
+  value: 'gif'
+}];
+const ConvertFeature = ({
+  onConvert
+}) => {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    className: "options-section",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+      className: "options-title",
+      children: "\u683C\u5F0F\u8F6C\u6362"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      className: "size-option",
+      children: formatOptions.map((format, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+        className: "size-option-btn",
+        onClick: () => onConvert(format.value),
+        children: format.name
+      }, index))
+    })]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (ConvertFeature);
+
+/***/ }),
+
+/***/ "./src/features/EditFeature/index.tsx":
+/*!********************************************!*\
+  !*** ./src/features/EditFeature/index.tsx ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+const EditFeature = ({
+  onRotate,
+  onFlip
+}) => {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    className: "options-section",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+      className: "options-title",
+      children: "\u7F16\u8F91\u9009\u9879"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      style: {
+        marginBottom: '20px'
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        style: {
+          fontSize: '16px',
+          color: 'var(--text-secondary)',
+          marginBottom: '10px',
+          display: 'block'
+        },
+        children: "\u65CB\u8F6C"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "edit-buttons",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onRotate(-90),
+          children: "\u5DE6\u8F6C90\xB0"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onRotate(90),
+          children: "\u53F3\u8F6C90\xB0"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onRotate(180),
+          children: "180\xB0"
+        })]
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        style: {
+          fontSize: '16px',
+          color: 'var(--text-secondary)',
+          marginBottom: '10px',
+          display: 'block'
+        },
+        children: "\u7FFB\u8F6C"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "edit-buttons",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFlip('horizontal'),
+          children: "\u6C34\u5E73\u7FFB\u8F6C"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFlip('vertical'),
+          children: "\u5782\u76F4\u7FFB\u8F6C"
+        })]
+      })]
+    })]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (EditFeature);
+
+/***/ }),
+
+/***/ "./src/features/FilterFeature/index.tsx":
+/*!**********************************************!*\
+  !*** ./src/features/FilterFeature/index.tsx ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+const FilterFeature = ({
+  onFilter
+}) => {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    className: "options-section",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+      className: "options-title",
+      children: "\u6EE4\u955C\u6548\u679C"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      style: {
+        marginBottom: '20px'
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        style: {
+          fontSize: '16px',
+          color: 'var(--text-secondary)',
+          marginBottom: '10px',
+          display: 'block'
+        },
+        children: "\u9ED1\u767D"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "filter-buttons",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFilter('grayscale', 50),
+          children: "50%"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFilter('grayscale', 100),
+          children: "100%"
+        })]
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      style: {
+        marginBottom: '20px'
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        style: {
+          fontSize: '16px',
+          color: 'var(--text-secondary)',
+          marginBottom: '10px',
+          display: 'block'
+        },
+        children: "\u590D\u53E4"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "filter-buttons",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFilter('sepia', 50),
+          children: "50%"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFilter('sepia', 100),
+          children: "100%"
+        })]
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        style: {
+          fontSize: '16px',
+          color: 'var(--text-secondary)',
+          marginBottom: '10px',
+          display: 'block'
+        },
+        children: "\u4EAE\u5EA6"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "filter-buttons",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFilter('brightness', 120),
+          children: "\u589E\u4EAE"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "action-btn",
+          onClick: () => onFilter('brightness', 80),
+          children: "\u53D8\u6697"
+        })]
+      })]
+    })]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (FilterFeature);
+
+/***/ }),
+
+/***/ "./src/features/ResizeFeature/index.tsx":
+/*!**********************************************!*\
+  !*** ./src/features/ResizeFeature/index.tsx ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _tarojs_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tarojs/components */ "./node_modules/@tarojs/plugin-platform-weapp/dist/components-react.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/cjs/react-jsx-runtime.production.min.js");
+
+
+
+const sizeOptions = [{
+  name: '一寸',
+  width: 295,
+  height: 413
+}, {
+  name: '小二寸',
+  width: 413,
+  height: 531
+}, {
+  name: '二寸',
+  width: 413,
+  height: 626
+}, {
+  name: '社保/身份证',
+  width: 358,
+  height: 441
+}, {
+  name: '四六级/计算机',
+  width: 144,
+  height: 192
+}, {
+  name: '卫生机构',
+  width: 160,
+  height: 210
+}, {
+  name: '毕业证',
+  width: 480,
+  height: 640
+}];
+const scaleOptions = [{
+  name: '填满画面（裁边）',
+  value: 'cover'
+}, {
+  name: '完整显示（留空白）',
+  value: 'contain'
+}, {
+  name: '拉伸填满（变形）',
+  value: 'stretch'
+}, {
+  name: '保留完整（可能小）',
+  value: 'keep'
+}, {
+  name: '至少覆盖（可能超出）',
+  value: 'cover_min'
+}];
+const ResizeFeature = ({
+  scaleMode,
+  onScaleModeChange,
+  onResize
+}) => {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+    className: "options-section",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        className: "options-title",
+        children: "\u5C3A\u5BF8\u9009\u9879"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "size-option",
+        children: sizeOptions.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Button, {
+          className: "size-option-btn",
+          onClick: () => {
+            onResize(option.width, option.height, scaleMode);
+          },
+          children: [option.name, " (", option.width, "x", option.height, ")"]
+        }, index))
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.Text, {
+        className: "options-title",
+        children: "\u7F29\u653E\u65B9\u5F0F"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+        className: "size-option",
+        children: scaleOptions.map((option, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
+          className: "size-option-btn",
+          onClick: () => onScaleModeChange(option.value),
+          children: option.name
+        }, index))
+      })]
+    })]
+  });
+};
+/* harmony default export */ __webpack_exports__["default"] = (ResizeFeature);
 
 /***/ }),
 

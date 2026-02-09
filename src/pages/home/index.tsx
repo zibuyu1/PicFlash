@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, Button } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.css'
 
@@ -10,35 +10,35 @@ const Home = () => {
       title: '图片压缩',
       description: '智能压缩图片大小，保持画质清晰',
       icon: '📸',
-      className: 'feature-card compress-card'
+      className: 'feature-card compress-card hover-lift'
     },
     {
       id: 'resize',
       title: '尺寸调整',
       description: '调整图片尺寸，支持多种证件照规格',
       icon: '📐',
-      className: 'feature-card resize-card'
+      className: 'feature-card resize-card hover-lift'
     },
     {
       id: 'convert',
       title: '格式转换',
       description: '转换图片格式，支持多种常用格式',
       icon: '🔄',
-      className: 'feature-card convert-card'
+      className: 'feature-card convert-card hover-lift'
     },
     {
       id: 'edit',
       title: '基础编辑',
       description: '旋转、翻转图片，简单编辑操作',
       icon: '✏️',
-      className: 'feature-card edit-card'
+      className: 'feature-card edit-card hover-lift'
     },
     {
       id: 'filter',
       title: '滤镜效果',
       description: '添加滤镜效果，调整图片风格',
       icon: '🎨',
-      className: 'feature-card filter-card'
+      className: 'feature-card filter-card hover-lift'
     }
   ]
 
@@ -49,19 +49,20 @@ const Home = () => {
   }
 
   return (
-    <View className="home">
+    <View className="home scanline-effect">
       <View className="home-header">
-        <Text className="home-title">图片处理工具</Text>
-        <Text className="home-subtitle">简单、高效的图片处理解决方案</Text>
+        <Text className="home-title neon-text">PicFlash AI</Text>
+        <Text className="home-subtitle">智能图片处理平台</Text>
       </View>
 
       <View className="home-content">
         <View className="features-grid">
-          {features.map((feature) => (
+          {features.map((feature, index) => (
             <View
               key={feature.id}
               className={feature.className}
               onClick={() => handleFeatureClick(feature.id)}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <Text className="feature-icon">{feature.icon}</Text>
               <Text className="feature-title">{feature.title}</Text>
@@ -72,7 +73,7 @@ const Home = () => {
       </View>
 
       <View className="footer">
-        <Text>© 2026 图片处理工具</Text>
+        <Text>© 2026 PicFlash AI</Text>
       </View>
     </View>
   )

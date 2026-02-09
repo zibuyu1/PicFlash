@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import './app.css'
+import './App.css'
 
 class App extends Component {
   componentDidMount() {}

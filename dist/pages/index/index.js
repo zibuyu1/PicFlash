@@ -264,11 +264,11 @@ function Index() {
     name: 'ICO',
     value: 'ico'
   }];
-  (0,_tarojs_taro__WEBPACK_IMPORTED_MODULE_2__.useLoad)(() => {
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     console.log('Page loaded.');
     processorRef.current = createImageProcessor('imageCanvas');
     processorRef.current.init();
-  });
+  }, []);
   (0,_tarojs_taro__WEBPACK_IMPORTED_MODULE_2__.useShareAppMessage)(res => {
     return {
       title: '图片处理工具',
@@ -780,10 +780,11 @@ function Index() {
                       style: {
                         width: '100%',
                         padding: '10px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--border)',
                         borderRadius: '8px',
                         fontSize: '16px',
-                        backgroundColor: '#fff'
+                        backgroundColor: 'rgba(26, 26, 46, 0.8)',
+                        color: 'var(--text)'
                       }
                     })]
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(_tarojs_components__WEBPACK_IMPORTED_MODULE_1__.View, {
@@ -803,10 +804,11 @@ function Index() {
                       style: {
                         width: '100%',
                         padding: '10px',
-                        border: '1px solid #ddd',
+                        border: '1px solid var(--border)',
                         borderRadius: '8px',
                         fontSize: '16px',
-                        backgroundColor: '#fff'
+                        backgroundColor: 'rgba(26, 26, 46, 0.8)',
+                        color: 'var(--text)'
                       }
                     })]
                   })]

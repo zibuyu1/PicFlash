@@ -18,8 +18,8 @@
 .option input[type="number"] {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(126, 34, 206, 0.3);
-  border-radius: 12px;
+  border: 1rpx solid rgba(126, 34, 206, 0.3);
+  border-radius: 12rpx;
   font-size: 1rem;
   background: #FAFAF9;
   transition: all 0.3s ease;
@@ -28,7 +28,7 @@
 .option input[type="number"]:focus {
   outline: none;
   border-color: #9333EA;
-  box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.1);
+  box-shadow: 0 0 0 3rpx rgba(126, 34, 206, 0.1);
 }
 
 .presets {
@@ -41,8 +41,8 @@
 .presets button {
   padding: 0.625rem 1.25rem;
   background-color: #FAFAF9;
-  border: 1px solid rgba(126, 34, 206, 0.3);
-  border-radius: 12px;
+  border: 1rpx solid rgba(126, 34, 206, 0.3);
+  border-radius: 12rpx;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
@@ -53,11 +53,11 @@
   background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%);
   color: white;
   border-color: #9333EA;
-  box-shadow: 0 4px 12px rgba(126, 34, 206, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0 4rpx 12rpx rgba(126, 34, 206, 0.3);
+  transform: translateY(-2rpx);
 }
 
 .presets button:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(126, 34, 206, 0.2);
+  box-shadow: 0 2rpx 8rpx rgba(126, 34, 206, 0.2);
 }

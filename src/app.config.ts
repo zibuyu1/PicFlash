@@ -6,28 +6,22 @@ export default {
     'pages/profile/index'
   ],
   window: {
-    backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#fff',
-    navigationBarTitleText: '图片处理工具',
-    navigationBarTextStyle: 'black'
+    backgroundTextStyle: 'dark',
+    navigationBarBackgroundColor: '#0F0F1A',
+    navigationBarTitleText: 'PicFlash AI',
+    navigationBarTextStyle: 'white'
   },
   tabBar: {
-    color: '#A8A29E',
-    selectedColor: '#9333EA',
-    backgroundColor: '#FAFAF9',
-    borderStyle: 'black',
+    color: '#A5B4FC',
+    selectedColor: '#6366F1',
+    backgroundColor: '#1A1A2E',
+    borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/home/index',
         text: '首页',
         iconPath: 'assets/images/home.png',
         selectedIconPath: 'assets/images/home-active.png'
-      },
-      {
-        pagePath: 'pages/editor/index',
-        text: '编辑',
-        iconPath: 'assets/images/editor.png',
-        selectedIconPath: 'assets/images/editor-active.png'
       },
       {
         pagePath: 'pages/profile/index',

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { View, Text, Canvas, Image, Button, Slider, Input, Checkbox } from '@tarojs/components'
-import Taro, { useLoad, useShareAppMessage } from '@tarojs/taro'
+import Taro, { useShareAppMessage } from '@tarojs/taro'
 import './index.css'
 
 const createImageProcessor = (canvasId) => {
@@ -258,11 +258,11 @@ export default function Index() {
     { name: 'ICO', value: 'ico' }
   ]
 
-  useLoad(() => {
+  useEffect(() => {
     console.log('Page loaded.')
     processorRef.current = createImageProcessor('imageCanvas')
     processorRef.current.init()
-  })
+  }, [])
 
   useShareAppMessage((res) => {
     return {
@@ -753,10 +753,11 @@ export default function Index() {
                             style={{
                               width: '100%',
                               padding: '10px',
-                              border: '1px solid #ddd',
+                              border: '1px solid var(--border)',
                               borderRadius: '8px',
                               fontSize: '16px',
-                              backgroundColor: '#fff'
+                              backgroundColor: 'rgba(26, 26, 46, 0.8)',
+                              color: 'var(--text)'
                             }}
                           />
                         </View>
@@ -772,10 +773,11 @@ export default function Index() {
                             style={{
                               width: '100%',
                               padding: '10px',
-                              border: '1px solid #ddd',
+                              border: '1px solid var(--border)',
                               borderRadius: '8px',
                               fontSize: '16px',
-                              backgroundColor: '#fff'
+                              backgroundColor: 'rgba(26, 26, 46, 0.8)',
+                              color: 'var(--text)'
                             }}
                           />
                         </View>

@@ -1,11 +1,18 @@
 .compress-options {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .option {
-  margin-bottom: 1.5rem;
+  flex: 1 1 45%;
+  min-width: 150px;
+  margin-bottom: 0;
+}
+
+.option.custom {
+  flex: 1 1 100%;
 }
 
 .option label {
@@ -17,8 +24,8 @@
 
 .option input[type="range"] {
   width: 100%;
-  height: 8px;
-  border-radius: 4px;
+  height: 8rpx;
+  border-radius: 4rpx;
   background: #E7E5E4;
   outline: none;
   -webkit-appearance: none;
@@ -27,32 +34,32 @@
 .option input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 20rpx;
+  height: 20rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%);
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(126, 34, 206, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(126, 34, 206, 0.3);
   transition: all 0.3s ease;
 }
 
 .option input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(126, 34, 206, 0.4);
+  box-shadow: 0 6rpx 16rpx rgba(126, 34, 206, 0.4);
 }
 
 .option input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 20rpx;
+  height: 20rpx;
   border-radius: 50%;
   background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%);
   cursor: pointer;
   border: none;
-  box-shadow: 0 4px 12px rgba(126, 34, 206, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(126, 34, 206, 0.3);
   transition: all 0.3s ease;
 }
 
 .option input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(126, 34, 206, 0.4);
+  box-shadow: 0 6rpx 16rpx rgba(126, 34, 206, 0.4);
 }

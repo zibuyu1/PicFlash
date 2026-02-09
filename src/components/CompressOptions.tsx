@@ -1,30 +1,39 @@
 import React from 'react'
+import { View, Text, Button } from '@tarojs/components'
 import '../styles/CompressOptions.css'
 
-interface CompressOptionsProps {
-  quality: number
-  onQualityChange: (quality: number) => void
-  className?: string
-}
+const qualityOptions = [
+  { label: '低质量', value: 0.3, description: '30%' },
+  { label: '中等质量', value: 0.5, description: '50%' },
+  { label: '高质量', value: 0.7, description: '70%' },
+  { label: '最佳质量', value: 0.9, description: '90%' }
+]
 
-export const CompressOptions: React.FC<CompressOptionsProps> = ({
+export const CompressOptions = ({
   quality,
   onQualityChange,
+  onCompress,
   className = ''
 }) => {
   return (
-    <div className={`compress-options ${className}`}>
-      <div className="option">
-        <label>压缩质量: {Math.round(quality * 100)}%</label>
-        <input
-          type="range"
-          min="0.1"
-          max="1"
-          step="0.1"
-          value={quality}
-          onChange={(e) => onQualityChange(parseFloat(e.target.value))}
-        />
-      </div>
-    </div>
+    <View className={`compress-options ${className}`}>
+      <View className="option">
+        <View className="size-option">
+          {qualityOptions.map((option, index) => (
+            <Button
+              key={index}
+              className="size-option-btn"
+              onClick={() => {
+                onQualityChange(option.value)
+                onCompress(option.value)
+              }}
+            >
+              <Text className="quality-label">{option.label}</Text>
+              <Text className="quality-desc">({option.description})</Text>
+            </Button>
+          ))}
+        </View>
+      </View>
+    </View>
   )
 }
