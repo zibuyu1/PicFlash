@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import '../styles/CustomHeader.css'
+import { icons } from '../constants/icons'
 
 interface CustomHeaderProps {
   title?: string
   showMenu?: boolean
   showSettings?: boolean
+  showBack?: boolean
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
   title = '图片处理工具',
   showMenu = true,
-  showSettings = true
+  showSettings = true,
+  showBack = false
 }) => {
   const [statusBarHeight, setStatusBarHeight] = useState('0px')
 
@@ -34,10 +37,8 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
     })
   }
 
-  const handleSettingsClick = () => {
-    Taro.navigateTo({
-      url: '/pages/profile/index'
-    })
+  const handleBackClick = () => {
+    Taro.navigateBack()
   }
 
   return (
@@ -46,7 +47,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       <View className="status-bar" style={{ height: statusBarHeight }} />
       {/* 导航栏内容 */}
       <View className="custom-header-content" style={{height: '44px'}}>
-        <Text className="custom-header-title" style={{fontSize: '16px'}}>{title}</Text>
+        {showBack && <View className="custom-header-left" onClick={handleBackClick}>
+          <Image className="custom-header-back-icon" src={icons.back} mode="aspectFit" />
+        </View>}
+        <Text className="custom-header-title" style={{fontSize: '14px'}}>{title}</Text>
       </View>
     </View>
   )

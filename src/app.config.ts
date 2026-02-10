@@ -9,13 +9,13 @@ export default {
     backgroundTextStyle: 'dark',
     navigationBarBackgroundColor: '#ffffff',
     navigationBarTitleText: '',
-    navigationBarTextStyle: 'black'
+    navigationBarTextStyle: 'white'
   },
   tabBar: {
-    color: '#666666',
-    selectedColor: '#333333',
-    backgroundColor: '#FFFFFF',
-    borderStyle: 'black',
+    color: '#999999',
+    selectedColor: '#ffffff',
+    backgroundColor: '#1a1a2e',
+    borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/home/index',

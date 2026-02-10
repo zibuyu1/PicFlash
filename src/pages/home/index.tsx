@@ -30,6 +30,16 @@ const Home = () => {
 
   const moreFeatures: FeatureItem[] = [
     {
+      id: 'compress',
+      title: '图片压缩',
+      icon: icons.compress,
+    },
+    {
+      id: 'convert',
+      title: '图片格式转换',
+      icon: icons.convert,
+    },
+    {
       id: 'text',
       title: '图片加文字',
       icon: icons.text

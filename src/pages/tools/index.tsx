@@ -4,6 +4,7 @@ import Taro, { useRouter } from '@tarojs/taro'
 import ImageUploader from '../../components/ImageUploader'
 import { createImageProcessor, type ImageProcessor } from '../../features/image/processor'
 import './index.css'
+import CustomHeader from '../../components/CustomHeader'
 
 const TOOL_META: Record<string, { title: string; desc: string }> = {
   compress: { title: '图片压缩', desc: '降低体积，尽量保持清晰' },
@@ -409,6 +410,7 @@ const ToolsPage = () => {
 
   return (
     <View className="tools-page">
+      <CustomHeader title={title} showBack={true} />
       <Canvas
         id="toolsCanvas"
         canvasId="toolsCanvas"
