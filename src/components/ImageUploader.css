@@ -1,0 +1,111 @@
+.uploader-container {
+  width: 100%;
+}
+
+.uploader-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6rpx;
+}
+
+.uploader-image-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 6rpx;
+  overflow: hidden;
+  background: var(--bg-tertiary, #334155);
+}
+
+.uploader-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.uploader-image-meta {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rpx 4rpx;
+  background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+}
+
+.uploader-size {
+  font-size: 14rpx;
+  color: #fff;
+  display: block;
+  text-align: center;
+}
+
+.uploader-remove {
+  position: absolute;
+  top: 2rpx;
+  right: 2rpx;
+  width: 24rpx;
+  height: 24rpx;
+  background: rgba(239, 68, 68, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploader-remove-icon {
+  color: #fff;
+  font-size: 18rpx;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.uploader-add {
+  aspect-ratio: 1;
+  border-radius: 6rpx;
+  border: 2rpx dashed var(--border-default, rgba(148, 163, 184, 0.25));
+  background: var(--bg-tertiary, #334155);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rpx;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploader-add:active {
+  border-color: var(--primary, #4f46e5);
+  background: var(--bg-primary, #0f172a);
+}
+
+.uploader-add-icon {
+  font-size: 28rpx;
+  font-weight: 300;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1;
+}
+
+.uploader-add-text {
+  font-size: 16rpx;
+  color: var(--text-tertiary, #64748b);
+}
+
+.uploader-loading {
+  font-size: 14rpx;
+  color: var(--primary, #4f46e5);
+}
+
+.uploader-hint {
+  font-size: 18rpx;
+  color: var(--text-tertiary, #64748b);
+  text-align: center;
+  margin-top: 10rpx;
+  display: block;
+}
+
+.uploader-count {
+  font-size: 18rpx;
+  color: var(--text-secondary, #94a3b8);
+  text-align: center;
+  margin-top: 10rpx;
+  display: block;
+}

@@ -1,7 +1,7 @@
 export default {
   pages: [
     'pages/home/index',
-    'pages/editor/index',
+    'pages/tools/index',
     'pages/index/index',
     'pages/profile/index'
   ],
@@ -9,8 +9,7 @@ export default {
     backgroundTextStyle: 'dark',
     navigationBarBackgroundColor: '#ffffff',
     navigationBarTitleText: '',
-    navigationBarTextStyle: 'black',
-    navigationStyle: 'custom'
+    navigationBarTextStyle: 'black'
   },
   tabBar: {
     color: '#666666',
