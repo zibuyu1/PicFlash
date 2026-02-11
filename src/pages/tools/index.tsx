@@ -224,9 +224,10 @@ const ToolsPage = () => {
       const info = (await Taro.getFileInfo({ filePath: path })) as Taro.getFileInfo.SuccessCallbackResult
       setResultPath(path)
       setResultSize(info.size)
-      Taro.showToast({ title: '处理完成', icon: 'success' })
-    } catch (e) {
-      Taro.showToast({ title: '处理失败', icon: 'none' })
+      Taro.showToast({ title: '拼图完成', icon: 'success' })
+    } catch (e: any) {
+      console.error('Collage error:', e)
+      Taro.showToast({ title: `失败: ${e?.message || '未知错误'}`, icon: 'none' })
     } finally {
       setIsProcessing(false)
     }
@@ -246,14 +247,16 @@ const ToolsPage = () => {
         size: qrSize,
         color: qrColor,
         bgColor: qrBgColor,
-        fileType: 'png'
+        fileType: 'png',
+        logo: source.length > 0 ? source[0].img : undefined
       })
       const info = (await Taro.getFileInfo({ filePath: path })) as Taro.getFileInfo.SuccessCallbackResult
       setResultPath(path)
       setResultSize(info.size)
       Taro.showToast({ title: '处理完成', icon: 'success' })
-    } catch (e) {
-      Taro.showToast({ title: '处理失败', icon: 'none' })
+    } catch (e: any) {
+      console.error('QR Code error:', e)
+      Taro.showToast({ title: `失败: ${e?.message || '未知错误'}`, icon: 'none' })
     } finally {
       setIsProcessing(false)
     }
@@ -281,8 +284,9 @@ const ToolsPage = () => {
       setResultPath(path)
       setResultSize(info.size)
       Taro.showToast({ title: '处理完成', icon: 'success' })
-    } catch (e) {
-      Taro.showToast({ title: '处理失败', icon: 'none' })
+    } catch (e: any) {
+      console.error('GIF error:', e)
+      Taro.showToast({ title: `失败: ${e?.message || '未知错误'}`, icon: 'none' })
     } finally {
       setIsProcessing(false)
     }
@@ -462,7 +466,7 @@ const ToolsPage = () => {
               min={10}
               max={100}
               step={1}
-              blockSize={12}
+              blockSize={18}
               onChanging={(e) => setCompressQuality(e.detail.value as number)}
               disabled={isProcessing}
             />
@@ -520,11 +524,6 @@ const ToolsPage = () => {
                 </View>
               ))}
             </View>
-            {convertType === 'jpg' && (
-              <Text className="tools-tip">
-                PNG 转 JPG 时透明背景将变为白色
-              </Text>
-            )}
           </View>
         )}
 
@@ -548,7 +547,7 @@ const ToolsPage = () => {
                   min={12}
                   max={96}
                   step={1}
-                  blockSize={12}
+                  blockSize={18}
                   onChanging={(e) => setTextFontSize(e.detail.value as number)}
                   disabled={isProcessing}
                 />
@@ -560,7 +559,7 @@ const ToolsPage = () => {
                   min={10}
                   max={100}
                   step={1}
-                  blockSize={12}
+                  blockSize={18}
                   onChanging={(e) => setTextOpacity(e.detail.value as number)}
                   disabled={isProcessing}
                 />
@@ -572,7 +571,7 @@ const ToolsPage = () => {
                   min={0}
                   max={80}
                   step={1}
-                  blockSize={12}
+                  blockSize={18}
                   onChanging={(e) => setTextPadding(e.detail.value as number)}
                   disabled={isProcessing}
                 />
@@ -656,7 +655,7 @@ const ToolsPage = () => {
                 min={0}
                 max={40}
                 step={1}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setCollageMargin(e.detail.value as number)}
                 disabled={isProcessing}
               />
@@ -726,7 +725,7 @@ const ToolsPage = () => {
                 min={0}
                 max={40}
                 step={1}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setStitchSpacing(e.detail.value as number)}
                 disabled={isProcessing}
               />
@@ -760,7 +759,7 @@ const ToolsPage = () => {
                 min={100}
                 max={800}
                 step={10}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setAvatarSize(e.detail.value as number)}
                 disabled={isProcessing}
               />
@@ -772,7 +771,7 @@ const ToolsPage = () => {
                 min={0}
                 max={40}
                 step={1}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setAvatarBorderWidth(e.detail.value as number)}
                 disabled={isProcessing}
               />
@@ -813,7 +812,7 @@ const ToolsPage = () => {
                 min={50}
                 max={1000}
                 step={10}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setGifDelay(e.detail.value as number)}
                 disabled={isProcessing}
               />
@@ -825,7 +824,7 @@ const ToolsPage = () => {
                 min={1}
                 max={20}
                 step={1}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setGifQuality(e.detail.value as number)}
                 disabled={isProcessing}
               />
@@ -851,7 +850,7 @@ const ToolsPage = () => {
                 min={100}
                 max={800}
                 step={10}
-                blockSize={12}
+                blockSize={18}
                 onChanging={(e) => setQrSize(e.detail.value as number)}
                 disabled={isProcessing}
               />

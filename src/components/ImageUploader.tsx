@@ -87,7 +87,7 @@ const ImageUploader = ({
           <View className="uploader-add" onClick={selectImages}>
             <Text className="uploader-add-icon">+</Text>
             <Text className="uploader-add-text">
-              {images.length === 0 ? '点击选择图片' : '添加'}
+              上传
             </Text>
             {isLoading && <Text className="uploader-loading">加载中...</Text>}
           </View>

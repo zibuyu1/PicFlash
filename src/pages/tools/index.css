@@ -50,17 +50,17 @@
   padding: 16rpx 20rpx;
 }
 .tools-header{
-  margin-bottom: 32rpx;
+  margin-bottom: 24rpx;
 }
 .tools-title {
-  font-size: 44rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: var(--text-primary);
   text-align: left;
 }
 
 .tools-desc {
-  font-size: 36rpx;
+  font-size: 26rpx;
   color: var(--text-tertiary);
   margin-left: 10rpx;
   text-align: left;
@@ -82,15 +82,15 @@
 
 /* ========== 标签与标题 ========== */
 .tools-label {
-  font-size: 36rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
   display: block;
 }
 
 .tools-row {
-  margin-bottom: 32rpx;
+  margin-bottom: 24rpx;
 }
 
 .tools-row:last-child {
@@ -195,14 +195,16 @@
 .tools-input,
 .tools-textarea {
   width: 100%;
-  padding: 20rpx;
+  padding: 0 24rpx;
   border-radius: 12rpx;
-  border: 1px solid var(--border-default);
-  font-size: 32rpx;
+  border: 2rpx solid var(--border-default);
+  font-size: 34rpx;
+  line-height: 76rpx;
   background: var(--bg-tertiary);
   color: var(--text-primary);
   box-sizing: border-box;
   transition: all 0.2s ease;
+  height: 80rpx;
 }
 
 .tools-input:focus,
@@ -213,8 +215,8 @@
 
 .tools-input::placeholder,
 .tools-textarea::placeholder {
-  color: var(--text-tertiary);
-  font-size: 30rpx;
+  color: var(--text-secondary);
+  font-size: 32rpx;
   line-height: 1.5;
 }
 
@@ -275,12 +277,12 @@
 .tools-pos-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .tools-pos {
-  border-radius: 10rpx;
-  padding: 12rpx 0;
+  border-radius: 8rpx;
+  padding: 8rpx 0;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-default);
   text-align: center;
@@ -293,7 +295,7 @@
 }
 
 .tools-pos-text {
-  font-size: 34rpx;
+  font-size: 24rpx;
   color: var(--text-secondary);
 }
 
@@ -335,13 +337,13 @@
 /* 平铺按钮选择器 */
 .tools-btn-row {
   display: flex;
-  gap: 16rpx;
+  gap: 12rpx;
   flex-wrap: wrap;
 }
 
 .tools-option-btn {
-  padding: 16rpx 28rpx;
-  border-radius: 10rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
   background: rgba(148, 163, 184, 0.1);
   border: none;
   transition: all 0.25s ease;
@@ -354,7 +356,7 @@
 }
 
 .tools-option-text {
-  font-size: 32rpx;
+  font-size: 26rpx;
   color: var(--text-secondary);
 }
 
@@ -447,9 +449,9 @@ slider {
 /* ========== 底部固定操作栏 ========== */
 .tools-footer {
   display: flex;
-  gap: 16rpx;
-  padding: 16rpx 20rpx;
-  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  gap: 12rpx;
+  padding: 12rpx 20rpx;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
   background: var(--bg-secondary);
   border-top: 1px solid var(--border-default);
   z-index: 100;
@@ -459,8 +461,8 @@ slider {
   flex: 1;
   border-radius: 12rpx;
   font-weight: 600;
-  font-size: 34rpx;
-  padding: 18rpx 0;
+  font-size: 30rpx;
+  padding: 14rpx 0;
   border: none;
   transition: opacity 0.2s ease;
 }

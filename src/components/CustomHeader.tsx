@@ -50,7 +50,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         {showBack && <View className="custom-header-left" onClick={handleBackClick}>
           <Image className="custom-header-back-icon" src={icons.back} mode="aspectFit" />
         </View>}
-        <Text className="custom-header-title" style={{fontSize: '14px'}}>{title}</Text>
+        <Text className="custom-header-title" style={{fontSize: '17px'}}>{title}</Text>
       </View>
     </View>
   )

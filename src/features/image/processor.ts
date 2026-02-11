@@ -37,6 +37,7 @@ export type ImageProcessor = {
       bgColor: string
       fileType: 'jpg' | 'png'
       quality?: number
+      logo?: any
     }
   ) => Promise<string>
   createGif: (
@@ -287,7 +288,8 @@ export const createImageProcessor = (canvasId: string): ImageProcessor => {
     if (imgs.length !== 9) throw new Error('Collage requires 9 images')
 
     const margin = Math.max(0, opts.margin || 0)
-    const itemSize = Math.max(100, ...imgs.map((i) => Math.max(i.width, i.height)))
+    const maxImgSize = Math.max(100, ...imgs.map((i) => Math.max(i.width, i.height)))
+    const itemSize = Math.min(maxImgSize, 400)
     const canvasSize = itemSize * 3 + margin * 4
 
     canvas.width = canvasSize
@@ -339,6 +341,7 @@ export const createImageProcessor = (canvasId: string): ImageProcessor => {
     bgColor: string
     fileType: 'jpg' | 'png'
     quality?: number
+    logo?: any
   }) => {
     if (!canvas || !ctx) throw new Error('Canvas not initialized')
 
@@ -355,6 +358,42 @@ export const createImageProcessor = (canvasId: string): ImageProcessor => {
     const img = await loadImage(base64)
     ctx.drawImage(img, 0, 0, size, size)
 
+    // 如果有 logo 图片，画在中心
+    if (opts.logo) {
+      const logoSize = size * 0.2 // logo 占二维码大小的 20%
+      const logoX = (size - logoSize) / 2
+      const logoY = (size - logoSize) / 2
+
+      // 绘制白色背景圆角矩形作为 logo 背景
+      ctx.fillStyle = opts.bgColor
+      const cornerRadius = logoSize * 0.15
+      ctx.beginPath()
+      ctx.moveTo(logoX + cornerRadius, logoY)
+      ctx.lineTo(logoX + logoSize - cornerRadius, logoY)
+      ctx.quadraticCurveTo(logoX + logoSize, logoY, logoX + logoSize, logoY + cornerRadius)
+      ctx.lineTo(logoX + logoSize, logoY + logoSize - cornerRadius)
+      ctx.quadraticCurveTo(logoX + logoSize, logoY + logoSize, logoX + logoSize - cornerRadius, logoY + logoSize)
+      ctx.lineTo(logoX + cornerRadius, logoY + logoSize)
+      ctx.quadraticCurveTo(logoX, logoY + logoSize, logoX, logoY + logoSize - cornerRadius)
+      ctx.lineTo(logoX, logoY + cornerRadius)
+      ctx.quadraticCurveTo(logoX, logoY, logoX + cornerRadius, logoY)
+      ctx.closePath()
+      ctx.fill()
+
+      // 绘制 logo 图片，保持比例
+      const ar = opts.logo.width / opts.logo.height
+      let dw = logoSize * 0.8
+      let dh = logoSize * 0.8
+      if (ar > 1) {
+        dh = dw / ar
+      } else {
+        dw = dh * ar
+      }
+      const dx = logoX + (logoSize - dw) / 2
+      const dy = logoY + (logoSize - dh) / 2
+      ctx.drawImage(opts.logo, dx, dy, dw, dh)
+    }
+
     return new Promise<string>((resolve, reject) => {
       Taro.canvasToTempFilePath({
         canvas,
@@ -368,31 +407,113 @@ export const createImageProcessor = (canvasId: string): ImageProcessor => {
 
   const createGif = async (imgs: any[], opts: { width: number; height: number; delay: number; quality: number }) => {
     if (!canvas || !ctx) throw new Error('Canvas not initialized')
+    if (imgs.length < 2) throw new Error('至少需要2张图片')
+
+    // 限制尺寸防止内存溢出
+    const maxSize = 300
+    let width = Math.min(opts.width, maxSize)
+    let height = Math.min(opts.height, maxSize)
+    
+    // 保持比例缩放
+    if (width > maxSize || height > maxSize) {
+      const ratio = Math.min(maxSize / width, maxSize / height)
+      width = Math.round(width * ratio)
+      height = Math.round(height * ratio)
+    }
 
     return new Promise<string>((resolve, reject) => {
-      const gif = new GIF({
-        workers: 2,
-        quality: opts.quality,
-        width: opts.width,
-        height: opts.height
-      })
+      const timeout = setTimeout(() => {
+        reject(new Error('GIF 生成超时'))
+      }, 60000)
 
-      imgs.forEach((img) => {
-        gif.addFrame(img, { delay: opts.delay })
-      })
+      try {
+        // 设置主 canvas 尺寸
+        canvas.width = width
+        canvas.height = height
 
-      gif.on('finished', (blob: any) => {
-        const url = URL.createObjectURL(blob)
-        const tempPath = `${Taro.env.USER_DATA_PATH}/${Date.now()}.gif`
-        Taro.downloadFile({
-          url,
-          filePath: tempPath,
-          success: () => resolve(tempPath),
-          fail: reject
+        const gif = new GIF({
+          workers: 0,
+          quality: Math.max(1, Math.min(30, opts.quality)),
+          width,
+          height,
+          background: '#ffffff'
         })
-      })
 
-      gif.render()
+        gif.on('finished', async (blob: any) => {
+          clearTimeout(timeout)
+          try {
+            const url = URL.createObjectURL(blob)
+            const tempPath = `${Taro.env.USER_DATA_PATH}/${Date.now()}.gif`
+            
+            await new Promise<void>((res, rej) => {
+              Taro.downloadFile({
+                url,
+                filePath: tempPath,
+                success: () => res(),
+                fail: rej
+              })
+            })
+            
+            resolve(tempPath)
+          } catch (e: any) {
+            console.error('Save GIF error:', e)
+            reject(new Error('保存 GIF 失败: ' + e?.message))
+          }
+        })
+
+        gif.on('error', (err: any) => {
+          clearTimeout(timeout)
+          console.error('GIF error:', err)
+          reject(new Error('GIF 渲染失败: ' + (err?.message || '未知错误')))
+        })
+
+        // 逐帧绘制并转为 Image 对象
+        let frameIndex = 0
+        
+        const addNextFrame = async () => {
+          if (frameIndex >= imgs.length) {
+            gif.render()
+            return
+          }
+          
+          const img = imgs[frameIndex]
+          ctx.clearRect(0, 0, width, height)
+          
+          // 居中绘制，保持比例
+          const ar = img.width / img.height
+          let dw = width
+          let dh = height
+          if (ar > width / height) {
+            dh = dw / ar
+          } else {
+            dw = dh * ar
+          }
+          const dx = (width - dw) / 2
+          const dy = (height - dh) / 2
+          ctx.drawImage(img, dx, dy, dw, dh)
+          
+          // 转为 data URL 并加载为 Image
+          const dataUrl = canvas.toDataURL('image/png')
+          const frameImg = canvas.createImage()
+          frameImg.onload = () => {
+            gif.addFrame(frameImg, { delay: opts.delay })
+            frameIndex++
+            setTimeout(addNextFrame, 0)
+          }
+          frameImg.onerror = () => {
+            reject(new Error(`第 ${frameIndex + 1} 帧加载失败`))
+          }
+          frameImg.src = dataUrl
+        }
+        
+        // 开始添加帧
+        addNextFrame()
+        
+      } catch (e: any) {
+        clearTimeout(timeout)
+        console.error('GIF init error:', e)
+        reject(new Error(`GIF 初始化失败: ${e?.message}`))
+      }
     })
   }
 

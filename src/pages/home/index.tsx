@@ -1,4 +1,4 @@
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text, Image, Swiper, SwiperItem } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import CustomHeader from '../../components/CustomHeader'
 import { icons } from '../../constants/icons'
@@ -13,19 +13,23 @@ type FeatureItem = {
 }
 
 const Home = () => {
-  const mainFeatures: FeatureItem[] = [
+  const banners = [
     {
       id: 'compress',
       title: '图片压缩',
+      subtitle: '智能压缩，节省空间',
       icon: icons.compress,
-      className: 'main-feature-card primary-feature hover-lift'
+      bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      className: 'banner-compress'
     },
     {
       id: 'convert',
       title: '图片格式转换',
+      subtitle: '支持多种格式互转',
       icon: icons.convert,
-      className: 'main-feature-card convert-feature hover-lift'
-    },
+      bgGradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      className: 'banner-convert'
+    }
   ]
 
   const moreFeatures: FeatureItem[] = [
@@ -44,11 +48,11 @@ const Home = () => {
       title: '图片加文字',
       icon: icons.text
     },
-    {
-      id: 'format',
-      title: '图片格式',
-      icon: icons.format
-    },
+    // {
+    //   id: 'format',
+    //   title: '图片格式',
+    //   icon: icons.format
+    // },
     {
       id: 'collage',
       title: '九宫格拼图',
@@ -91,23 +95,37 @@ const Home = () => {
     <View className="home scanline-effect">
       <CustomHeader />
       <View className="home-content">
-        <View className="main-features-section">
-          <View className="main-features-grid">
-            {mainFeatures.map((feature, index) => (
-              <View
-                key={feature.id}
-                className={feature.className}
-                onClick={() => handleFeatureClick(feature.id)}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <View className="main-feature-icon-wrap">
-                  <Image className="main-feature-icon" src={feature.icon} mode="aspectFit" />
+        <View className="banner-section">
+          <Swiper
+            className="banner-swiper"
+            autoplay
+            interval={4000}
+            circular
+            indicatorDots
+            indicatorColor="rgba(255, 255, 255, 0.4)"
+            indicatorActiveColor="#ffffff"
+          >
+            {banners.map((banner) => (
+              <SwiperItem key={banner.id}>
+                <View
+                  className={`banner-item ${banner.className}`}
+                  style={{ background: banner.bgGradient }}
+                  onClick={() => handleFeatureClick(banner.id)}
+                >
+                  <View className="banner-content">
+                    <View className="banner-icon-wrap">
+                      <Image className="banner-icon" src={banner.icon} mode="aspectFit" />
+                    </View>
+                    <View className="banner-text">
+                      <Text className="banner-title">{banner.title}</Text>
+                      <Text className="banner-subtitle">{banner.subtitle}</Text>
+                    </View>
+                  </View>
+                  <View className="banner-decoration" />
                 </View>
-                <Text className="main-feature-title">{feature.title}</Text>
-                <Text className="main-feature-btn">立即体验</Text>
-              </View>
+              </SwiperItem>
             ))}
-          </View>
+          </Swiper>
         </View>
 
         <View className="more-features-section">

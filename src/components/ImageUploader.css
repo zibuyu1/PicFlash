@@ -32,7 +32,7 @@
 }
 
 .uploader-size {
-  font-size: 14rpx;
+  font-size: 22rpx;
   color: #fff;
   display: block;
   text-align: center;
@@ -60,14 +60,14 @@
 
 .uploader-add {
   aspect-ratio: 1;
-  border-radius: 6rpx;
-  border: 2rpx dashed var(--border-default, rgba(148, 163, 184, 0.25));
+  border-radius: 10rpx;
+  border: 3rpx dashed var(--border-default, rgba(148, 163, 184, 0.25));
   background: var(--bg-tertiary, #334155);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rpx;
+  gap: 8rpx;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -78,34 +78,34 @@
 }
 
 .uploader-add-icon {
-  font-size: 28rpx;
+  font-size: 48rpx;
   font-weight: 300;
   color: var(--text-secondary, #94a3b8);
   line-height: 1;
 }
 
 .uploader-add-text {
-  font-size: 16rpx;
+  font-size: 26rpx;
   color: var(--text-tertiary, #64748b);
 }
 
 .uploader-loading {
-  font-size: 14rpx;
+  font-size: 24rpx;
   color: var(--primary, #4f46e5);
 }
 
 .uploader-hint {
-  font-size: 18rpx;
+  font-size: 28rpx;
   color: var(--text-tertiary, #64748b);
   text-align: center;
-  margin-top: 10rpx;
+  margin-top: 16rpx;
   display: block;
 }
 
 .uploader-count {
-  font-size: 18rpx;
+  font-size: 28rpx;
   color: var(--text-secondary, #94a3b8);
   text-align: center;
-  margin-top: 10rpx;
+  margin-top: 16rpx;
   display: block;
 }
